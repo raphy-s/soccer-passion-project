@@ -1,13 +1,14 @@
 import requests
 import pandas as pd
+import streamlit as st
 
-API_KEY = "531070fe203d4adaa853a65c382fb4b8"
-
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+API_KEY = st.secrets["FOOTBALL_API_KEY"]
 headers = {
     "X-Auth-Token": API_KEY
 }
 
-url = "https://api.football-data.org/v4/competitions/PL/standings"
+url = st.secrets["SUPABASE_URL"]
 
 response = requests.get(url, headers=headers)
 
