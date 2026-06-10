@@ -119,17 +119,6 @@ rank_lookup = dict(
 )
 
 df["power_rank"] = df["team"].map(rank_lookup)
-
-    power_df["power_rank"] = power_df.index + 1
-
-    df = df.merge(
-        power_df[
-            ["team", "power_rank"]
-        ],
-        on="team",
-        how="left"
-    )
-
     df["difference"] = (
         df["position"].astype(int)
         -
