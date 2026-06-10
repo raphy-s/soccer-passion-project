@@ -69,7 +69,7 @@ df["power_rank"] = df.index + 1
 # UPLOAD TO SUPABASE
 # -----------------------
 for _, row in df.iterrows():
-    supabase.table("premier_league_standings").insert({
+    supabase.table("premier_league_standings").upsert({
         "position": int(row["position"]),
         "team": row["team"],
         "played": int(row["played"]),
