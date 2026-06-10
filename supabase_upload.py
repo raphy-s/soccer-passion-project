@@ -69,7 +69,8 @@ df["power_rank"] = df.index + 1
 # UPLOAD TO SUPABASE
 # -----------------------
 for _, row in df.iterrows():
-    supabase.table("premier_league_standings").upsert({
+    supabase.table("premier_league_standings").upsert(
+    {
         "position": int(row["position"]),
         "team": row["team"],
         "played": int(row["played"]),
@@ -82,6 +83,8 @@ for _, row in df.iterrows():
         "goal_difference": int(row["goal_difference"]),
         "power_rating": float(row["power_rating"]),
         "power_rank": int(row["power_rank"])
-    }).execute()
+    },
+    on_conflict="team"
+).execute()
 
 print("Upload complete 🚀")
