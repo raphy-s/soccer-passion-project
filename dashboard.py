@@ -142,3 +142,10 @@ st.bar_chart(
 )
 st.markdown("---")
 st.markdown("**By Raphael Shehata**")
+competition = st.sidebar.selectbox(
+    "Competition",
+    ["Premier League", "World Cup"]
+)
+
+st.write(f"Viewing: {competition}")
+
