@@ -3,17 +3,23 @@ import pandas as pd
 from supabase import create_client, Client
 
 import streamlit as st
+import os
 
-SUPABASE_URL = st.secrets["SUPABASE_URL"]
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-API_KEY = st.secrets["FOOTBALL_API_KEY"]
+try:
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    API_KEY = st.secrets["FOOTBALL_API_KEY"]
+
+except Exception:
+    SUPABASE_URL = os.environ["SUPABASE_URL"]
+    SUPABASE_KEY = os.environ["SUPABASE_KEY"]
+    API_KEY = os.environ["FOOTBALL_API_KEY"]
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # -----------------------
 # FOOTBALL API
 # -----------------------
-API_KEY = "531070fe203d4adaa853a65c382fb4b8"
 
 headers = {
     "X-Auth-Token": API_KEY
