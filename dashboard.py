@@ -45,20 +45,106 @@ if competition == "World Cup":
 
     st.title("🌎 FIFA World Cup Analytics")
 
-    st.info(
-        "World Cup Power Rankings and Matchday Picks will automatically appear once group-stage matches are played."
-    )
+    with st.spinner("Loading World Cup data..."):
 
-    st.markdown("""
-    ### Coming Soon
+        response = (
+            supabase
+            .table("world_cup_standings")
+            .select("*")
+            .execute()
+        )
 
-    - World Cup Power Rankings
-    - Matchday Picks
-    - Confidence Ratings
-    - Group Stage Analytics
+        world_df = pd.DataFrame(response.data)
 
-    Powered by the same Raphael Power Rating model used for the Premier League.
-    """)
+    if len(world_df) == 0:
+
+        st.warning(
+            "No World Cup data available."
+        )
+
+    else:
+
+        world_df = world_df.sort_values(
+            "power_rank"
+        )
+
+        selected_team = st.selectbox(
+            "Choose a World Cup Team",
+            sorted(world_df["team"])
+        )
+
+        team_data = world_df[
+            world_df["team"] == selected_team
+        ].iloc[0]
+
+        st.subheader(
+            f"📊 {selected_team}"
+        )
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.metric(
+                "FIFA Rank",
+                int(team_data["fifa_rank"])
+            )
+
+        with col2:
+            st.metric(
+                "Power Rank",
+                int(team_data["power_rank"])
+            )
+
+        with col3:
+            st.metric(
+                "Power Rating",
+                round(
+                    float(team_data["power_rating"]),
+                    2
+                )
+            )
+
+        st.subheader(
+            "World Cup Power Rankings"
+        )
+
+        display_df = world_df[
+            [
+                "power_rank",
+                "team",
+                "fifa_rank",
+                "power_rating"
+            ]
+        ].sort_values(
+            "power_rank"
+        )
+
+        st.dataframe(
+            display_df,
+            use_container_width=True
+        )
+
+        st.subheader(
+            "Top 10 World Cup Teams"
+        )
+
+        st.dataframe(
+            display_df.head(10),
+            use_container_width=True
+        )
+
+        st.subheader(
+            "World Cup Power Rating Chart"
+        )
+
+        st.bar_chart(
+            world_df.set_index(
+                "team"
+            )["power_rating"]
+        )
+
+        st.markdown("---")
+        st.markdown("**By Raphael Shehata**")
 
     st.markdown("---")
     st.markdown("**By Raphael Shehata**")
