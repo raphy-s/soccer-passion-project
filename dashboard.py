@@ -101,13 +101,24 @@ elif competition == "Premier League":
     # -----------------------
 
     power_df = (
-        df.sort_values(
-            "power_rating",
-            ascending=False
-        )
-        .reset_index(drop=True)
-        .copy()
+    df.sort_values(
+        "power_rating",
+        ascending=False
     )
+    .reset_index(drop=True)
+    .copy()
+)
+
+power_df["power_rank"] = power_df.index + 1
+
+rank_lookup = dict(
+    zip(
+        power_df["team"],
+        power_df["power_rank"]
+    )
+)
+
+df["power_rank"] = df["team"].map(rank_lookup)
 
     power_df["power_rank"] = power_df.index + 1
 
