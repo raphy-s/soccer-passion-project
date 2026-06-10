@@ -15,6 +15,7 @@ st_autorefresh(interval=60000, limit=None, key="refresh")
 # -----------------------
 
 st.title("⚽ Raphael Shehata Football Analytics")
+
 st.caption(
     "Custom Power Rankings • Matchday Picks • Data Updated Daily"
 )
@@ -36,9 +37,9 @@ competition = st.sidebar.selectbox(
     index=0
 )
 
-# =======================
+# ==================================================
 # WORLD CUP PAGE
-# =======================
+# ==================================================
 
 if competition == "World Cup":
 
@@ -62,14 +63,14 @@ if competition == "World Cup":
     st.markdown("---")
     st.markdown("**By Raphael Shehata**")
 
-# =======================
+# ==================================================
 # PREMIER LEAGUE PAGE
-# =======================
+# ==================================================
 
 elif competition == "Premier League":
 
     # -----------------------
-    # SUPABASE CONNECTION
+    # SUPABASE
     # -----------------------
 
     SUPABASE_URL = st.secrets["SUPABASE_URL"]
@@ -79,6 +80,10 @@ elif competition == "Premier League":
         SUPABASE_URL,
         SUPABASE_KEY
     )
+
+    # -----------------------
+    # LOAD DATA
+    # -----------------------
 
     with st.spinner("Loading latest Premier League data..."):
 
@@ -92,25 +97,32 @@ elif competition == "Premier League":
         df = pd.DataFrame(response.data)
 
     # -----------------------
-    # POWER RANKING
+    # POWER RANKINGS
     # -----------------------
 
-    power_df = df.sort_values(
-        "power_rating",
-        ascending=False
-    ).reset_index(drop=True)
+    power_df = (
+        df.sort_values(
+            "power_rating",
+            ascending=False
+        )
+        .reset_index(drop=True)
+        .copy()
+    )
 
     power_df["power_rank"] = power_df.index + 1
 
     df = df.merge(
-        power_df[["team", "power_rank"]],
-        on="team"
+        power_df[
+            ["team", "power_rank"]
+        ],
+        on="team",
+        how="left"
     )
 
     df["difference"] = (
-        df["position"]
+        df["position"].astype(int)
         -
-        df["power_rank"]
+        df["power_rank"].astype(int)
     )
 
     # -----------------------
@@ -165,13 +177,13 @@ elif competition == "Premier League":
         st.metric(
             "Power Rating",
             round(
-                team_data["power_rating"],
+                float(team_data["power_rating"]),
                 2
             )
         )
 
     # -----------------------
-    # TABLE COMPARISON
+    # TABLE
     # -----------------------
 
     st.subheader(
