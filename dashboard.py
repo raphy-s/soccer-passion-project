@@ -48,7 +48,10 @@ df["difference"] = df["position"] - df["power_rank"]
 # -----------------------
 # UI
 # -----------------------
-st.title("⚽ Premier League Power Rankings Dashboard")
+st.title("⚽ Raphael Shehata Football Analytics")
+st.caption(
+    "Custom Power Rankings • Matchday Picks • Data Updated Daily"
+)
 
 st.markdown("""
 ### Power Rating Formula
