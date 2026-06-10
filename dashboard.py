@@ -119,7 +119,7 @@ rank_lookup = dict(
 )
 
 df["power_rank"] = df["team"].map(rank_lookup)
-    df["difference"] = (
+df["difference"] = (
         df["position"].astype(int)
         -
         df["power_rank"].astype(int)
