@@ -153,3 +153,10 @@ competition = st.sidebar.selectbox(
     ],
     index=0
 )
+if competition == "World Cup":
+
+    st.title("🌎 FIFA World Cup Analytics")
+
+    st.write(
+        "World Cup Power Rankings and Matchday Picks will automatically appear once group-stage matches are played."
+    )
