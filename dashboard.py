@@ -167,7 +167,11 @@ if competition == "World Cup":
 # ==================================================
 
 st.subheader(
-    "🎯 Upcoming Matchday Picks"
+    "🔥 AI Match Predictions"
+)
+
+st.caption(
+    "Predictions generated using Elo ratings, FIFA rankings, and tournament performance."
 )
 
 if len(matches_df) > 0:
@@ -227,7 +231,7 @@ if len(matches_df) > 0:
         else:
 
             st.info(
-                "No upcoming World Cup matches."
+                "No more upcoming World Cup matches."
             )
 
         # ==================================================
