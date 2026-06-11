@@ -443,3 +443,66 @@ elif competition == "Premier League":
 
     st.markdown("---")
     st.markdown("**By Raphael Shehata**")
+
+elif competition == "World Cup Analytics":
+
+    st.title("📈 World Cup Analytics")
+
+    response = (
+        supabase
+        .table("world_cup_matches")
+        .select("*")
+        .execute()
+    )
+
+    analytics_df = pd.DataFrame(response.data)
+
+    if len(analytics_df) == 0:
+
+        st.info(
+            "No prediction data available."
+        )
+
+    else:
+
+        completed = analytics_df[
+            analytics_df["correct"].notna()
+        ]
+
+        if len(completed) == 0:
+
+            st.info(
+                "No completed World Cup matches yet."
+            )
+
+        else:
+
+            accuracy = round(
+                completed["correct"].mean() * 100,
+                1
+            )
+
+            st.metric(
+                "Overall Accuracy",
+                f"{accuracy}%"
+            )
+
+            st.subheader(
+                "Confidence Breakdown"
+            )
+
+            breakdown = (
+                completed
+                .groupby("confidence")["correct"]
+                .mean()
+                .reset_index()
+            )
+
+            breakdown["correct"] = (
+                breakdown["correct"] * 100
+            ).round(1)
+
+            st.dataframe(
+                breakdown,
+                use_container_width=True
+            )
