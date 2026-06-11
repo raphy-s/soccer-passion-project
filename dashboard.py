@@ -48,172 +48,163 @@ competition = st.sidebar.selectbox(
     index=0
 )
 
-# ==================================================
-# WORLD CUP PAGE
-# ==================================================
-
 if competition == "World Cup":
 
-```
-st.title("🌎 FIFA World Cup 2026 Analytics")
-
-# ==================================================
-# LOAD DATA
-# ==================================================
-
-with st.spinner("Loading World Cup data..."):
-
-    standings_response = (
-        supabase
-        .table("world_cup_standings")
-        .select("*")
-        .execute()
-    )
-
-    world_df = pd.DataFrame(
-        standings_response.data
-    )
-
-    matches_response = (
-        supabase
-        .table("world_cup_matches")
-        .select("*")
-        .order("match_date")
-        .execute()
-    )
-
-    matches_df = pd.DataFrame(
-        matches_response.data
-    )
-
-if len(world_df) == 0:
-
-    st.warning(
-        "No World Cup data available."
-    )
-
-else:
-
-    world_df = world_df.sort_values(
-        "power_rank"
-    )
+    st.title("🌎 FIFA World Cup 2026 Analytics")
 
     # ==================================================
-    # HERO SECTION
+    # LOAD DATA
     # ==================================================
 
-    st.markdown(
-        """
-        ### Predictive Analytics • Elo Ratings • Matchday Picks
-        """
-    )
+    with st.spinner("Loading World Cup data..."):
 
-    top_team = world_df.iloc[0]["team"]
-
-    top_elo = int(
-        world_df["elo_rating"].max()
-    )
-
-    avg_rating = round(
-        world_df["power_rating"].mean(),
-        2
-    )
-
-    matches_today = 0
-
-    if len(matches_df) > 0:
-
-        matches_df["match_date"] = pd.to_datetime(
-            matches_df["match_date"],
-            utc=True
+        standings_response = (
+            supabase
+            .table("world_cup_standings")
+            .select("*")
+            .execute()
         )
 
-        today = pd.Timestamp.utcnow().date()
+        world_df = pd.DataFrame(
+            standings_response.data
+        )
 
-        matches_today = len(
-            matches_df[
+        matches_response = (
+            supabase
+            .table("world_cup_matches")
+            .select("*")
+            .order("match_date")
+            .execute()
+        )
+
+        matches_df = pd.DataFrame(
+            matches_response.data
+        )
+
+    if len(world_df) == 0:
+
+        st.warning(
+            "No World Cup data available."
+        )
+
+    else:
+
+        world_df = world_df.sort_values(
+            "power_rank"
+        )
+
+        # ==================================================
+        # HERO SECTION
+        # ==================================================
+
+        st.markdown(
+            "### Predictive Analytics • Elo Ratings • Matchday Picks"
+        )
+
+        top_team = world_df.iloc[0]["team"]
+
+        top_elo = int(
+            world_df["elo_rating"].max()
+        )
+
+        avg_rating = round(
+            world_df["power_rating"].mean(),
+            2
+        )
+
+        matches_today = 0
+
+        if len(matches_df) > 0:
+
+            matches_df["match_date"] = pd.to_datetime(
+                matches_df["match_date"],
+                utc=True
+            )
+
+            today = pd.Timestamp.utcnow().date()
+
+            matches_today = len(
+                matches_df[
+                    matches_df["match_date"].dt.date
+                    == today
+                ]
+            )
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.metric(
+                "🏆 #1 Team",
+                top_team
+            )
+
+        with col2:
+            st.metric(
+                "⚡ Top Elo",
+                top_elo
+            )
+
+        with col3:
+            st.metric(
+                "🎯 Matches Today",
+                matches_today
+            )
+
+        with col4:
+            st.metric(
+                "📊 Avg Rating",
+                avg_rating
+            )
+
+        st.markdown("---")
+
+        # ==================================================
+        # TODAY'S PICKS
+        # ==================================================
+
+        st.subheader(
+            "🎯 Today's Matchday Picks"
+        )
+
+        if len(matches_df) > 0:
+
+            today_matches = matches_df[
                 matches_df["match_date"].dt.date
-                == today
+                ==
+                pd.Timestamp.utcnow().date()
             ]
-        )
 
-    col1, col2, col3, col4 = st.columns(4)
+            if len(today_matches) > 0:
 
-    with col1:
-        st.metric(
-            "🏆 #1 Team",
-            top_team
-        )
+                for _, match in (
+                    today_matches.iterrows()
+                ):
 
-    with col2:
-        st.metric(
-            "⚡ Top Elo",
-            top_elo
-        )
-
-    with col3:
-        st.metric(
-            "🎯 Matches Today",
-            matches_today
-        )
-
-    with col4:
-        st.metric(
-            "📊 Avg Rating",
-            avg_rating
-        )
-
-    st.markdown("---")
-
-    # ==================================================
-    # TODAY'S PICKS
-    # ==================================================
-
-    st.subheader(
-        "🎯 Today's Matchday Picks"
-    )
-
-    if len(matches_df) > 0:
-
-        today_matches = matches_df[
-            matches_df["match_date"].dt.date
-            ==
-            pd.Timestamp.utcnow().date()
-        ]
-
-        if len(today_matches) > 0:
-
-            for _, match in (
-                today_matches.iterrows()
-            ):
-
-                confidence = (
-                    match["confidence"]
-                )
-
-                if confidence == "Very High":
-                    emoji = "🔥"
-
-                elif confidence == "High":
-                    emoji = "✅"
-
-                elif confidence == "Medium":
-                    emoji = "📊"
-
-                else:
-                    emoji = "⚪"
-
-                kickoff = (
-                    match["match_date"]
-                    .strftime(
-                        "%I:%M %p UTC"
+                    confidence = (
+                        match["confidence"]
                     )
-                )
 
-                st.markdown(
-                    f"""
-```
+                    if confidence == "Very High":
+                        emoji = "🔥"
 
+                    elif confidence == "High":
+                        emoji = "✅"
+
+                    elif confidence == "Medium":
+                        emoji = "📊"
+
+                    else:
+                        emoji = "⚪"
+
+                    kickoff = (
+                        match["match_date"]
+                        .strftime(
+                            "%I:%M %p UTC"
+                        )
+                    )
+
+                    st.markdown(
+                        f"""
 ### {emoji} {match['home_team']} vs {match['away_team']}
 
 **Prediction:** {match['pick']}
@@ -223,186 +214,183 @@ else:
 **Kickoff:** {kickoff}
 
 ---
-
 """
-)
+                    )
 
-```
-        else:
+            else:
 
-            st.info(
-                "No World Cup matches today."
+                st.info(
+                    "No World Cup matches today."
+                )
+
+        st.markdown("---")
+
+        # ==================================================
+        # TEAM EXPLORER
+        # ==================================================
+
+        st.subheader(
+            "🔍 Team Explorer"
+        )
+
+        selected_team = st.selectbox(
+            "Choose a Team",
+            sorted(
+                world_df["team"]
             )
+        )
 
-    st.markdown("---")
-
-    # ==================================================
-    # TEAM EXPLORER
-    # ==================================================
-
-    st.subheader(
-        "🔍 Team Explorer"
-    )
-
-    selected_team = st.selectbox(
-        "Choose a Team",
-        sorted(
+        team_data = world_df[
             world_df["team"]
-        )
-    )
+            ==
+            selected_team
+        ].iloc[0]
 
-    team_data = world_df[
-        world_df["team"]
-        ==
-        selected_team
-    ].iloc[0]
-
-    st.markdown(
-        f"## {selected_team}"
-    )
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.metric(
-            "FIFA Rank",
-            int(
-                team_data[
-                    "fifa_rank"
-                ]
-            )
+        st.markdown(
+            f"## {selected_team}"
         )
 
-    with col2:
-        st.metric(
-            "Power Rank",
-            int(
-                team_data[
-                    "power_rank"
-                ]
-            )
-        )
+        col1, col2, col3, col4 = st.columns(4)
 
-    with col3:
-        st.metric(
-            "Elo Rating",
-            int(
-                team_data[
-                    "elo_rating"
-                ]
-            )
-        )
-
-    with col4:
-        st.metric(
-            "Power Rating",
-            round(
-                float(
+        with col1:
+            st.metric(
+                "FIFA Rank",
+                int(
                     team_data[
-                        "power_rating"
+                        "fifa_rank"
                     ]
-                ),
-                2
+                )
             )
+
+        with col2:
+            st.metric(
+                "Power Rank",
+                int(
+                    team_data[
+                        "power_rank"
+                    ]
+                )
+            )
+
+        with col3:
+            st.metric(
+                "Elo Rating",
+                int(
+                    team_data[
+                        "elo_rating"
+                    ]
+                )
+            )
+
+        with col4:
+            st.metric(
+                "Power Rating",
+                round(
+                    float(
+                        team_data[
+                            "power_rating"
+                        ]
+                    ),
+                    2
+                )
+            )
+
+        st.markdown("---")
+
+        # ==================================================
+        # TOP 10
+        # ==================================================
+
+        st.subheader(
+            "🏆 Top 10 World Cup Teams"
         )
 
-    st.markdown("---")
-
-    # ==================================================
-    # TOP 10
-    # ==================================================
-
-    st.subheader(
-        "🏆 Top 10 World Cup Teams"
-    )
-
-    top10 = world_df[
-        [
-            "power_rank",
-            "team",
-            "elo_rating",
-            "fifa_rank",
-            "power_rating"
-        ]
-    ].head(10)
-
-    st.dataframe(
-        top10,
-        use_container_width=True
-    )
-
-    # ==================================================
-    # POWER RATING CHART
-    # ==================================================
-
-    st.subheader(
-        "📈 Top 15 Power Ratings"
-    )
-
-    chart_df = (
-        world_df
-        .sort_values(
-            "power_rating",
-            ascending=False
-        )
-        .head(15)
-    )
-
-    st.bar_chart(
-        chart_df.set_index(
-            "team"
-        )["power_rating"]
-    )
-
-    # ==================================================
-    # ELO CHART
-    # ==================================================
-
-    st.subheader(
-        "⚡ Top 15 Elo Ratings"
-    )
-
-    elo_df = (
-        world_df
-        .sort_values(
-            "elo_rating",
-            ascending=False
-        )
-        .head(15)
-    )
-
-    st.bar_chart(
-        elo_df.set_index(
-            "team"
-        )["elo_rating"]
-    )
-
-    # ==================================================
-    # FULL RANKINGS
-    # ==================================================
-
-    with st.expander(
-        "📋 Full Rankings"
-    ):
+        top10 = world_df[
+            [
+                "power_rank",
+                "team",
+                "elo_rating",
+                "fifa_rank",
+                "power_rating"
+            ]
+        ].head(10)
 
         st.dataframe(
-            world_df[
-                [
-                    "power_rank",
-                    "team",
-                    "elo_rating",
-                    "fifa_rank",
-                    "power_rating"
-                ]
-            ],
+            top10,
             use_container_width=True
         )
 
-    st.markdown("---")
-    st.markdown(
-        "**Built by Raphael Shehata**"
-    )
-```
+        # ==================================================
+        # POWER RATING CHART
+        # ==================================================
+
+        st.subheader(
+            "📈 Top 15 Power Ratings"
+        )
+
+        chart_df = (
+            world_df
+            .sort_values(
+                "power_rating",
+                ascending=False
+            )
+            .head(15)
+        )
+
+        st.bar_chart(
+            chart_df.set_index(
+                "team"
+            )["power_rating"]
+        )
+
+        # ==================================================
+        # ELO CHART
+        # ==================================================
+
+        st.subheader(
+            "⚡ Top 15 Elo Ratings"
+        )
+
+        elo_df = (
+            world_df
+            .sort_values(
+                "elo_rating",
+                ascending=False
+            )
+            .head(15)
+        )
+
+        st.bar_chart(
+            elo_df.set_index(
+                "team"
+            )["elo_rating"]
+        )
+
+        # ==================================================
+        # FULL RANKINGS
+        # ==================================================
+
+        with st.expander(
+            "📋 Full Rankings"
+        ):
+
+            st.dataframe(
+                world_df[
+                    [
+                        "power_rank",
+                        "team",
+                        "elo_rating",
+                        "fifa_rank",
+                        "power_rating"
+                    ]
+                ],
+                use_container_width=True
+            )
+
+        st.markdown("---")
+        st.markdown(
+            "**Built by Raphael Shehata**"
+        )
 
 
 # ==================================================
