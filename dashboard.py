@@ -51,10 +51,6 @@ competition = st.sidebar.selectbox(
 # WORLD CUP PAGE
 # ==================================================
 
-# ==================================================
-# WORLD CUP PAGE
-# ==================================================
-
 if competition == "World Cup":
 
     st.title("🌎 FIFA World Cup Analytics")
@@ -75,7 +71,7 @@ if competition == "World Cup":
         world_df = pd.DataFrame(response.data)
 
     # -----------------------
-    # LOAD MATCHDAY PICKS
+    # LOAD MATCH PICKS
     # -----------------------
 
     matches_response = (
@@ -99,6 +95,70 @@ if competition == "World Cup":
         world_df = world_df.sort_values(
             "power_rank"
         )
+
+        # -----------------------
+        # NEXT MATCHDAY PICKS
+        # -----------------------
+
+        st.subheader("🎯 Upcoming Matchday Picks")
+
+        if len(matches_df) > 0:
+
+            matches_df["match_date"] = pd.to_datetime(
+                matches_df["match_date"]
+            )
+
+            now = pd.Timestamp.utcnow()
+
+            future_matches = matches_df[
+                matches_df["match_date"] >= now
+            ].copy()
+
+            if len(future_matches) > 0:
+
+                next_matchday = (
+                    future_matches["match_date"]
+                    .dt.date
+                    .min()
+                )
+
+                picks_df = future_matches[
+                    future_matches["match_date"].dt.date
+                    == next_matchday
+                ]
+
+                st.caption(
+                    f"Matchday: {next_matchday}"
+                )
+
+                for _, match in picks_df.iterrows():
+
+                    col1, col2, col3 = st.columns(
+                        [4, 2, 2]
+                    )
+
+                    with col1:
+                        st.markdown(
+                            f"### {match['home_team']} vs {match['away_team']}"
+                        )
+
+                    with col2:
+                        st.success(
+                            f"🏆 {match['pick']}"
+                        )
+
+                    with col3:
+                        st.info(
+                            f"📈 {match['confidence']}"
+                        )
+
+                    st.markdown("---")
+
+            else:
+
+                st.info(
+                    "No upcoming World Cup matches found."
+                )
 
         # -----------------------
         # TEAM SELECTOR
@@ -141,7 +201,7 @@ if competition == "World Cup":
             )
 
         # -----------------------
-        # POWER RANKINGS TABLE
+        # POWER RANKINGS
         # -----------------------
 
         st.subheader(
@@ -190,46 +250,6 @@ if competition == "World Cup":
                 "team"
             )["power_rating"]
         )
-
-        # -----------------------
-        # MATCHDAY PICKS
-        # -----------------------
-
-        st.subheader(
-            "🎯 World Cup Matchday Picks"
-        )
-        
-        if len(picks_df) > 0:
-
-            from datetime import datetime
-
-            today = datetime.utcnow().date()
-
-            matches_df["match_date"] = pd.to_datetime(
-                matches_df["match_date"]
-            )
-
-            picks_df = matches_df[
-                matches_df["match_date"].dt.date == today
-            ][
-                [
-                    "home_team",
-                    "away_team",
-                    "pick",
-                    "confidence"
-                ]
-            ]
-
-            st.dataframe(
-                picks_df,
-                use_container_width=True
-            )
-
-        else:
-
-            st.info(
-                "No matchday picks available."
-            )
 
         st.markdown("---")
         st.markdown("**By Raphael Shehata**")
