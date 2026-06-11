@@ -384,7 +384,7 @@ if competition == "🌎 World Cup":
 # PREMIER LEAGUE PAGE
 # ==================================================
 
-elif competition == "Premier League":
+elif competition == "🏴 Premier League" :
 
     # -----------------------
     # SUPABASE
@@ -567,7 +567,7 @@ elif competition == "Premier League":
     st.markdown("---")
     st.markdown("**By Raphael Shehata**")
 
-elif competition == "World Cup Analytics":
+elif competition == "📈 World Cup Analytics":
 
     st.title("📈 World Cup Analytics")
 
