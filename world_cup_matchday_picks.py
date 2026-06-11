@@ -23,6 +23,7 @@ supabase = create_client(
     SUPABASE_KEY
 )
 
+
 # -----------------------
 # LOAD WORLD CUP RATINGS
 # -----------------------
@@ -39,9 +40,10 @@ df = pd.DataFrame(response.data)
 ratings = dict(
     zip(
         df["team"],
-        df["power_rating"]
+        df["elo_rating"]
     )
 )
+
 
 # -----------------------
 # GET WORLD CUP FIXTURES
@@ -86,9 +88,8 @@ for match in matches:
     if not home or not away:
         continue
 
-    home_rating = ratings.get(home, 0)
-    away_rating = ratings.get(away, 0)
-
+    home_rating = ratings.get(home)
+    away_rating = ratings.get(away)
 
     if home_rating is None:
         print("Missing home team:", home)
@@ -98,43 +99,87 @@ for match in matches:
         print("Missing away team:", away)
         continue
 
-    diff = abs(home_rating - away_rating)
+    # Elo win probability
 
-    if home_rating > away_rating:
+    home_probability = (
+        1 /
+        (
+            1 +
+            10 ** (
+                (away_rating - home_rating)
+                / 400
+            )
+        )
+    )
+
+    away_probability = (
+        1 - home_probability
+    )
+
+    if home_probability > away_probability:
+
         pick = home
+
+        win_probability = round(
+            home_probability * 100,
+            1
+        )
+
     else:
+
         pick = away
 
-    confidence_score = round(diff * 10, 1)
+        win_probability = round(
+            away_probability * 100,
+            1
+        )
 
-    if diff >= 3:
+    diff = abs(
+        home_probability
+        -
+        away_probability
+    ) * 100
+
+    if diff >= 40:
         confidence = "Very High"
-    elif diff >= 2:
+
+    elif diff >= 25:
         confidence = "High"
-    elif diff >= 1:
+
+    elif diff >= 10:
         confidence = "Medium"
+
     else:
         confidence = "Low"
-
     print(
-        f"{home} vs {away} | "
-        f"Pick: {pick} | "
-        f"Confidence: {confidence} | "
-        f"Score: {confidence_score}/10"
-    )
-    print("INSERTING:", home, "vs", away)
-    supabase.table(
-        "world_cup_matches"
-    ).insert(
         {
-            "home_team": home,
-            "away_team": away,
-            "pick": pick,
-            "confidence": confidence,
-            "rating_difference": diff,
-            "match_date": match["utcDate"]
+        "home_team": home,
+        "away_team": away,
+        "pick": pick,
+        "confidence": confidence,
+        "rating_difference": diff,
+        "win_probability": win_probability,
+        "match_date": match["utcDate"]
         }
-    ).execute()
+    )
+
+    payload = {
+    "home_team": home,
+    "away_team": away,
+    "pick": pick,
+    "confidence": confidence,
+    "rating_difference": float(diff),
+    "win_probability": float(win_probability),
+    "match_date": match["utcDate"]
+}
+
+    result = (
+        supabase
+        .table("world_cup_matches")
+        .insert(payload)
+        .execute()
+    )
+
+    print(result.data)
 
 print("Matchday picks uploaded 🚀")
-print(sorted(df["team"].tolist()))
