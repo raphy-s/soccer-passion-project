@@ -51,9 +51,17 @@ competition = st.sidebar.selectbox(
 # WORLD CUP PAGE
 # ==================================================
 
+# ==================================================
+# WORLD CUP PAGE
+# ==================================================
+
 if competition == "World Cup":
 
     st.title("🌎 FIFA World Cup Analytics")
+
+    # -----------------------
+    # LOAD STANDINGS
+    # -----------------------
 
     with st.spinner("Loading World Cup data..."):
 
@@ -66,6 +74,20 @@ if competition == "World Cup":
 
         world_df = pd.DataFrame(response.data)
 
+    # -----------------------
+    # LOAD MATCHDAY PICKS
+    # -----------------------
+
+    matches_response = (
+        supabase
+        .table("world_cup_matches")
+        .select("*")
+        .order("match_date")
+        .execute()
+    )
+
+    matches_df = pd.DataFrame(matches_response.data)
+
     if len(world_df) == 0:
 
         st.warning(
@@ -77,6 +99,10 @@ if competition == "World Cup":
         world_df = world_df.sort_values(
             "power_rank"
         )
+
+        # -----------------------
+        # TEAM SELECTOR
+        # -----------------------
 
         selected_team = st.selectbox(
             "Choose a World Cup Team",
@@ -114,6 +140,10 @@ if competition == "World Cup":
                 )
             )
 
+        # -----------------------
+        # POWER RANKINGS TABLE
+        # -----------------------
+
         st.subheader(
             "World Cup Power Rankings"
         )
@@ -134,6 +164,10 @@ if competition == "World Cup":
             use_container_width=True
         )
 
+        # -----------------------
+        # TOP 10
+        # -----------------------
+
         st.subheader(
             "Top 10 World Cup Teams"
         )
@@ -142,6 +176,10 @@ if competition == "World Cup":
             display_df.head(10),
             use_container_width=True
         )
+
+        # -----------------------
+        # CHART
+        # -----------------------
 
         st.subheader(
             "World Cup Power Rating Chart"
@@ -153,11 +191,38 @@ if competition == "World Cup":
             )["power_rating"]
         )
 
+        # -----------------------
+        # MATCHDAY PICKS
+        # -----------------------
+
+        st.subheader(
+            "🎯 World Cup Matchday Picks"
+        )
+
+        if len(matches_df) > 0:
+
+            picks_df = matches_df[
+                [
+                    "home_team",
+                    "away_team",
+                    "pick",
+                    "confidence"
+                ]
+            ]
+
+            st.dataframe(
+                picks_df,
+                use_container_width=True
+            )
+
+        else:
+
+            st.info(
+                "No matchday picks available."
+            )
+
         st.markdown("---")
         st.markdown("**By Raphael Shehata**")
-
-    st.markdown("---")
-    st.markdown("**By Raphael Shehata**")
 
 # ==================================================
 # PREMIER LEAGUE PAGE
