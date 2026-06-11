@@ -38,23 +38,25 @@ supabase = create_client(
 # SIDEBAR
 # -----------------------
 
+
 competition = st.sidebar.selectbox(
     "Competition",
     [
-        "World Cup",
-        "Premier League",
-        "World Cup Analytics"
+        "🌎 World Cup",
+        "🎯 Matchday Picks",
+        "📈 World Cup Analytics",
+        "🏴 Premier League"
     ],
     index=0
 )
 
-if competition == "World Cup":
+# ==================================================
+# WORLD CUP PAGE
+# ==================================================
+
+if competition == "🌎 World Cup":
 
     st.title("🌎 FIFA World Cup 2026 Analytics")
-
-    # ==================================================
-    # LOAD DATA
-    # ==================================================
 
     with st.spinner("Loading World Cup data..."):
 
@@ -69,18 +71,6 @@ if competition == "World Cup":
             standings_response.data
         )
 
-        matches_response = (
-            supabase
-            .table("world_cup_matches")
-            .select("*")
-            .order("match_date")
-            .execute()
-        )
-
-        matches_df = pd.DataFrame(
-            matches_response.data
-        )
-
     if len(world_df) == 0:
 
         st.warning(
@@ -93,12 +83,12 @@ if competition == "World Cup":
             "power_rank"
         )
 
-        # ==================================================
+        # =====================================
         # HERO SECTION
-        # ==================================================
+        # =====================================
 
         st.markdown(
-            "### Predictive Analytics • Elo Ratings • Matchday Picks"
+            "### Predictive Analytics • Elo Ratings • Power Rankings"
         )
 
         top_team = world_df.iloc[0]["team"]
@@ -112,45 +102,29 @@ if competition == "World Cup":
             2
         )
 
-        matches_today = 0
+        total_teams = len(world_df)
 
-        if len(matches_df) > 0:
+        c1, c2, c3, c4 = st.columns(4)
 
-            matches_df["match_date"] = pd.to_datetime(
-                matches_df["match_date"],
-                utc=True
-            )
-
-            today = pd.Timestamp.utcnow().date()
-
-            matches_today = len(
-                matches_df[
-                    matches_df["match_date"].dt.date
-                    == today
-                ]
-            )
-
-        col1, col2, col3, col4 = st.columns(4)
-
-        with col1:
+        with c1:
             st.metric(
                 "🏆 #1 Team",
                 top_team
             )
 
-        with col2:
+        with c2:
             st.metric(
                 "⚡ Top Elo",
                 top_elo
             )
 
-        with col3:
+        with c3:
             st.metric(
-                "🎯 Matches Today",
-                matches_today
+                "🌍 Teams",
+                total_teams
             )
 
-        with col4:
+        with c4:
             st.metric(
                 "📊 Avg Rating",
                 avg_rating
@@ -158,85 +132,9 @@ if competition == "World Cup":
 
         st.markdown("---")
 
-        # ==================================================
-        # TODAY'S PICKS
-        # ==================================================
-
-        # ==================================================
-# NEXT MATCHDAY PICKS
-# ==================================================
-
-    st.subheader(
-        "🔥 AI Match Predictions"
-    )
-
-    st.caption(
-        "Predictions generated using Elo ratings, FIFA rankings, and tournament performance."
-    )
-
-    if len(matches_df) > 0:
-
-        matches_df["match_date"] = pd.to_datetime(
-            matches_df["match_date"],
-            utc=True
-        )
-
-        now = pd.Timestamp.utcnow()
-
-        upcoming_matches = (
-            matches_df[
-                matches_df["match_date"] >= now
-            ]
-            .sort_values("match_date")
-            .head(8)
-        )
-
-    if len(upcoming_matches) > 0:
-
-        for _, match in upcoming_matches.iterrows():
-
-            confidence = match["confidence"]
-
-            if confidence == "Very High":
-                emoji = "🔥"
-
-            elif confidence == "High":
-                emoji = "✅"
-
-            elif confidence == "Medium":
-                emoji = "📊"
-
-            else:
-                emoji = "⚪"
-
-            kickoff = (
-                match["match_date"]
-                .strftime("%b %d • %I:%M %p UTC")
-            )
-
-            st.markdown(
-                f"""
-    ### {emoji} {match['home_team']} vs {match['away_team']}
-
-    **Prediction:** {match['pick']}
-
-    **Confidence:** {match['confidence']}
-
-    **Kickoff:** {kickoff}
-
-    ---
-    """
-            )
-
-        else:
-
-            st.info(
-                "No more upcoming World Cup matches."
-            )
-
-        # ==================================================
+        # =====================================
         # TEAM EXPLORER
-        # ==================================================
+        # =====================================
 
         st.subheader(
             "🔍 Team Explorer"
@@ -259,46 +157,32 @@ if competition == "World Cup":
             f"## {selected_team}"
         )
 
-        col1, col2, col3, col4 = st.columns(4)
+        c1, c2, c3, c4 = st.columns(4)
 
-        with col1:
+        with c1:
             st.metric(
                 "FIFA Rank",
-                int(
-                    team_data[
-                        "fifa_rank"
-                    ]
-                )
+                int(team_data["fifa_rank"])
             )
 
-        with col2:
+        with c2:
             st.metric(
                 "Power Rank",
-                int(
-                    team_data[
-                        "power_rank"
-                    ]
-                )
+                int(team_data["power_rank"])
             )
 
-        with col3:
+        with c3:
             st.metric(
                 "Elo Rating",
-                int(
-                    team_data[
-                        "elo_rating"
-                    ]
-                )
+                int(team_data["elo_rating"])
             )
 
-        with col4:
+        with c4:
             st.metric(
                 "Power Rating",
                 round(
                     float(
-                        team_data[
-                            "power_rating"
-                        ]
+                        team_data["power_rating"]
                     ),
                     2
                 )
@@ -306,32 +190,30 @@ if competition == "World Cup":
 
         st.markdown("---")
 
-        # ==================================================
+        # =====================================
         # TOP 10
-        # ==================================================
+        # =====================================
 
         st.subheader(
-            "🏆 Top 10 World Cup Teams"
+            "🏆 Top 10 Teams"
         )
 
-        top10 = world_df[
-            [
-                "power_rank",
-                "team",
-                "elo_rating",
-                "fifa_rank",
-                "power_rating"
-            ]
-        ].head(10)
-
         st.dataframe(
-            top10,
+            world_df[
+                [
+                    "power_rank",
+                    "team",
+                    "elo_rating",
+                    "fifa_rank",
+                    "power_rating"
+                ]
+            ].head(10),
             use_container_width=True
         )
 
-        # ==================================================
-        # POWER RATING CHART
-        # ==================================================
+        # =====================================
+        # POWER CHART
+        # =====================================
 
         st.subheader(
             "📈 Top 15 Power Ratings"
@@ -352,9 +234,9 @@ if competition == "World Cup":
             )["power_rating"]
         )
 
-        # ==================================================
+        # =====================================
         # ELO CHART
-        # ==================================================
+        # =====================================
 
         st.subheader(
             "⚡ Top 15 Elo Ratings"
@@ -375,9 +257,9 @@ if competition == "World Cup":
             )["elo_rating"]
         )
 
-        # ==================================================
-        # FULL RANKINGS
-        # ==================================================
+        # =====================================
+        # FULL TABLE
+        # =====================================
 
         with st.expander(
             "📋 Full Rankings"
@@ -400,7 +282,104 @@ if competition == "World Cup":
         st.markdown(
             "**Built by Raphael Shehata**"
         )
+# ==================================================
+# MATCHDAY PICKS PAGE
+# ==================================================
 
+elif competition == "🎯 Matchday Picks":
+
+    st.title(
+        "🎯 World Cup Matchday Picks"
+    )
+
+    response = (
+        supabase
+        .table("world_cup_matches")
+        .select("*")
+        .order("match_date")
+        .execute()
+    )
+
+    matches_df = pd.DataFrame(
+        response.data
+    )
+
+    if len(matches_df) == 0:
+
+        st.info(
+            "No predictions available."
+        )
+
+    else:
+
+        matches_df["match_date"] = pd.to_datetime(
+            matches_df["match_date"],
+            utc=True
+        )
+
+        now = pd.Timestamp.utcnow()
+
+        upcoming_matches = (
+            matches_df[
+                matches_df["match_date"] >= now
+            ]
+            .sort_values("match_date")
+            .head(12)
+        )
+
+        st.caption(
+            "Predictions generated using Elo ratings and tournament performance."
+        )
+
+        for _, match in upcoming_matches.iterrows():
+
+            confidence = match["confidence"]
+
+            if confidence == "Very High":
+                emoji = "🔥"
+
+            elif confidence == "High":
+                emoji = "✅"
+
+            elif confidence == "Medium":
+                emoji = "📊"
+
+            else:
+                emoji = "⚪"
+
+            kickoff = (
+                match["match_date"]
+                .strftime(
+                    "%b %d • %I:%M %p UTC"
+                )
+            )
+
+            probability = round(
+                float(
+                    match["win_probability"]
+                ),
+                1
+            )
+
+            st.markdown(
+                f"""
+### {emoji} {match['home_team']} vs {match['away_team']}
+
+**Prediction:** {match['pick']}
+
+**Win Probability:** {probability}%
+
+**Confidence:** {match['confidence']}
+
+**Kickoff:** {kickoff}
+
+---
+"""
+            )
+
+        st.markdown(
+            "**Built by Raphael Shehata**"
+        )
 
 # ==================================================
 # PREMIER LEAGUE PAGE
