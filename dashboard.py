@@ -42,10 +42,10 @@ supabase = create_client(
 competition = st.sidebar.selectbox(
     "Competition",
     [
-        "Matchday Picks",
-        "World Cup",
-        "Premier League",
-        "World Cup Analytics"
+        "🎯 Matchday Picks",
+        "🌎 World Cup",
+        "🏴 Premier League",
+        "📈 World Cup Analytics"
     ],
     index=0
 )
