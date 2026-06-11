@@ -42,7 +42,8 @@ competition = st.sidebar.selectbox(
     "Competition",
     [
         "World Cup",
-        "Premier League"
+        "Premier League",
+        "World Cup Analytics"
     ],
     index=0
 )
