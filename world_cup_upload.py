@@ -66,10 +66,6 @@ print(
     len(data["standings"])
 )
 
-# -----------------------
-# TRANSFORM DATA
-# -----------------------
-
 rows = []
 
 for group in data["standings"]:
@@ -87,7 +83,14 @@ for group in data["standings"]:
 
         played = team["playedGames"]
 
-        # Before tournament starts
+        # Initial Elo
+
+        elo_rating = 2000 - (
+            fifa_rank * 10
+        )
+
+        # Power Rating
+
         if played == 0:
 
             power_rating = round(
@@ -95,7 +98,6 @@ for group in data["standings"]:
                 2
             )
 
-        # Once matches begin
         else:
 
             power_rating = round(
@@ -127,19 +129,20 @@ for group in data["standings"]:
             "goals_against": team["goalsAgainst"],
             "goal_difference": team["goalDifference"],
             "fifa_rank": fifa_rank,
+            "elo_rating": elo_rating,
             "power_rating": power_rating
         })
-
 # -----------------------
 # DATAFRAME
 # -----------------------
 
 df = pd.DataFrame(rows)
 
-print(
-    "Teams found:",
-    len(df)
-)
+print("Teams found:", len(df))
+
+print("Rows:", len(rows))
+print(df.columns)
+print(df.head())
 
 # -----------------------
 # POWER RANK
@@ -184,10 +187,23 @@ for _, row in df.iterrows():
             "goals_against": int(row["goals_against"]),
             "goal_difference": int(row["goal_difference"]),
             "fifa_rank": int(row["fifa_rank"]),
+            "elo_rating": float(row["elo_rating"]),
             "power_rating": float(row["power_rating"]),
             "power_rank": int(row["power_rank"])
         })
         .execute()
     )
+
+print(
+    df[
+        [
+            "power_rank",
+            "team",
+            "fifa_rank",
+            "elo_rating",
+            "power_rating"
+        ]
+    ].head(10)
+)
 
 print("Upload complete 🚀")
