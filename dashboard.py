@@ -54,7 +54,7 @@ competition = st.sidebar.selectbox(
 # MATCHDAY PICKS PAGE
 # ==================================================
 
-if competition == "Matchday Picks":
+if competition == "🎯 Matchday Picks":
 
     st.title("🔥 AI Matchday Predictions")
 
