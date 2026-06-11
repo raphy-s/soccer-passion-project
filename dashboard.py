@@ -166,30 +166,30 @@ if competition == "World Cup":
 # NEXT MATCHDAY PICKS
 # ==================================================
 
-st.subheader(
-    "🔥 AI Match Predictions"
-)
-
-st.caption(
-    "Predictions generated using Elo ratings, FIFA rankings, and tournament performance."
-)
-
-if len(matches_df) > 0:
-
-    matches_df["match_date"] = pd.to_datetime(
-        matches_df["match_date"],
-        utc=True
+    st.subheader(
+        "🔥 AI Match Predictions"
     )
 
-    now = pd.Timestamp.utcnow()
-
-    upcoming_matches = (
-        matches_df[
-            matches_df["match_date"] >= now
-        ]
-        .sort_values("match_date")
-        .head(8)
+    st.caption(
+        "Predictions generated using Elo ratings, FIFA rankings, and tournament performance."
     )
+
+    if len(matches_df) > 0:
+
+        matches_df["match_date"] = pd.to_datetime(
+            matches_df["match_date"],
+            utc=True
+        )
+
+        now = pd.Timestamp.utcnow()
+
+        upcoming_matches = (
+            matches_df[
+                matches_df["match_date"] >= now
+            ]
+            .sort_values("match_date")
+            .head(8)
+        )
 
     if len(upcoming_matches) > 0:
 
@@ -216,16 +216,16 @@ if len(matches_df) > 0:
 
             st.markdown(
                 f"""
-### {emoji} {match['home_team']} vs {match['away_team']}
+    ### {emoji} {match['home_team']} vs {match['away_team']}
 
-**Prediction:** {match['pick']}
+    **Prediction:** {match['pick']}
 
-**Confidence:** {match['confidence']}
+    **Confidence:** {match['confidence']}
 
-**Kickoff:** {kickoff}
+    **Kickoff:** {kickoff}
 
----
-"""
+    ---
+    """
             )
 
         else:
