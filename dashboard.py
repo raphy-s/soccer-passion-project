@@ -198,17 +198,27 @@ if competition == "World Cup":
         st.subheader(
             "🎯 World Cup Matchday Picks"
         )
+        
+        if len(picks_df) > 0:
 
-        if len(matches_df) > 0:
+        from datetime import datetime
 
-            picks_df = matches_df[
-                [
-                    "home_team",
-                    "away_team",
-                    "pick",
-                    "confidence"
-                ]
+        today = datetime.utcnow().date()
+
+        matches_df["match_date"] = pd.to_datetime(
+            matches_df["match_date"]
+        )
+
+        picks_df = matches_df[
+            matches_df["match_date"].dt.date == today
+        ][
+            [
+                "home_team",
+                "away_team",
+                "pick",
+                "confidence"
             ]
+        ]
 
             st.dataframe(
                 picks_df,
