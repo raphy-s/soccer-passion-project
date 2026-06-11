@@ -97,68 +97,71 @@ if competition == "World Cup":
         )
 
         # -----------------------
-        # NEXT MATCHDAY PICKS
+        # UPCOMING WORLD CUP PICKS
         # -----------------------
 
-        st.subheader("🎯 Upcoming Matchday Picks")
+        st.subheader("🎯 Upcoming World Cup Picks")
 
         if len(matches_df) > 0:
 
             matches_df["match_date"] = pd.to_datetime(
-                matches_df["match_date"]
+                matches_df["match_date"],
+                utc=True
             )
 
             now = pd.Timestamp.utcnow()
 
-            future_matches = matches_df[
-                matches_df["match_date"] >= now
-            ].copy()
+            future_matches = (
+                matches_df[
+                    matches_df["match_date"] >= now
+                ]
+                .sort_values("match_date")
+                .copy()
+            )
 
             if len(future_matches) > 0:
 
-                next_matchday = (
-                    future_matches["match_date"]
-                    .dt.date
-                    .min()
-                )
+                # Show next 8 scheduled matches
 
-                picks_df = future_matches[
-                    future_matches["match_date"].dt.date
-                    == next_matchday
-                ]
+                picks_df = future_matches.head(8)
 
                 st.caption(
-                    f"Matchday: {next_matchday}"
+                    "Predictions for the next scheduled World Cup matches"
                 )
 
                 for _, match in picks_df.iterrows():
 
-                    col1, col2, col3 = st.columns(
-                        [4, 2, 2]
+                    kickoff = (
+                        match["match_date"]
+                        .strftime("%b %d • %I:%M %p UTC")
                     )
 
-                    with col1:
-                        st.markdown(
-                            f"### {match['home_team']} vs {match['away_team']}"
-                        )
+                    st.markdown(
+                        f"""
+        ### ⚽ {match['home_team']} vs {match['away_team']}
 
-                    with col2:
-                        st.success(
-                            f"🏆 {match['pick']}"
-                        )
+        **🏆 Pick:** {match['pick']}
 
-                    with col3:
-                        st.info(
-                            f"📈 {match['confidence']}"
-                        )
+        **📈 Confidence:** {match['confidence']}
 
-                    st.markdown("---")
+        **🕒 Kickoff:** {kickoff}
+
+        ---
+        """
+                    )
 
             else:
 
                 st.info(
                     "No upcoming World Cup matches found."
                 )
+
+        else:
+
+            st.info(
+                "No match predictions available."
+            )
+                        )
 
         # -----------------------
         # TEAM SELECTOR
