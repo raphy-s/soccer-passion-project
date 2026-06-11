@@ -42,13 +42,110 @@ supabase = create_client(
 competition = st.sidebar.selectbox(
     "Competition",
     [
-        "🌎 World Cup",
-        "🎯 Matchday Picks",
-        "📈 World Cup Analytics",
-        "🏴 Premier League"
+        "Matchday Picks",
+        "World Cup",
+        "Premier League",
+        "World Cup Analytics"
     ],
     index=0
 )
+
+# ==================================================
+# MATCHDAY PICKS PAGE
+# ==================================================
+
+if competition == "Matchday Picks":
+
+    st.title("🔥 AI Matchday Predictions")
+
+    st.caption(
+        "Predictions generated using Elo ratings, FIFA rankings, and tournament performance."
+    )
+
+    matches_response = (
+        supabase
+        .table("world_cup_matches")
+        .select("*")
+        .order("match_date")
+        .execute()
+    )
+
+    matches_df = pd.DataFrame(
+        matches_response.data
+    )
+
+    if len(matches_df) > 0:
+
+        matches_df["match_date"] = pd.to_datetime(
+            matches_df["match_date"],
+            utc=True
+        )
+
+        now = pd.Timestamp.utcnow()
+
+        upcoming_matches = (
+            matches_df[
+                matches_df["match_date"] >= now
+            ]
+            .sort_values("match_date")
+            .head(12)
+        )
+
+        if len(upcoming_matches) > 0:
+
+            for _, match in upcoming_matches.iterrows():
+
+                confidence = match["confidence"]
+
+                if confidence == "Very High":
+                    emoji = "🔥"
+
+                elif confidence == "High":
+                    emoji = "✅"
+
+                elif confidence == "Medium":
+                    emoji = "📊"
+
+                else:
+                    emoji = "⚪"
+
+                kickoff = (
+                    match["match_date"]
+                    .strftime("%b %d • %I:%M %p UTC")
+                )
+
+                probability = round(
+                    float(match["win_probability"]),
+                    1
+                )
+
+                st.markdown(
+                    f"""
+### {emoji} {match['home_team']} vs {match['away_team']}
+
+**Prediction:** {match['pick']}
+
+**Win Probability:** {probability}%
+
+**Confidence:** {match['confidence']}
+
+**Kickoff:** {kickoff}
+
+---
+"""
+                )
+
+        else:
+
+            st.info(
+                "No upcoming matches."
+            )
+
+    else:
+
+        st.info(
+            "No predictions available."
+        )
 
 # ==================================================
 # WORLD CUP PAGE
@@ -279,104 +376,6 @@ if competition == "🌎 World Cup":
             )
 
         st.markdown("---")
-        st.markdown(
-            "**Built by Raphael Shehata**"
-        )
-# ==================================================
-# MATCHDAY PICKS PAGE
-# ==================================================
-
-elif competition == "🎯 Matchday Picks":
-
-    st.title(
-        "🎯 World Cup Matchday Picks"
-    )
-
-    response = (
-        supabase
-        .table("world_cup_matches")
-        .select("*")
-        .order("match_date")
-        .execute()
-    )
-
-    matches_df = pd.DataFrame(
-        response.data
-    )
-
-    if len(matches_df) == 0:
-
-        st.info(
-            "No predictions available."
-        )
-
-    else:
-
-        matches_df["match_date"] = pd.to_datetime(
-            matches_df["match_date"],
-            utc=True
-        )
-
-        now = pd.Timestamp.utcnow()
-
-        upcoming_matches = (
-            matches_df[
-                matches_df["match_date"] >= now
-            ]
-            .sort_values("match_date")
-            .head(12)
-        )
-
-        st.caption(
-            "Predictions generated using Elo ratings and tournament performance."
-        )
-
-        for _, match in upcoming_matches.iterrows():
-
-            confidence = match["confidence"]
-
-            if confidence == "Very High":
-                emoji = "🔥"
-
-            elif confidence == "High":
-                emoji = "✅"
-
-            elif confidence == "Medium":
-                emoji = "📊"
-
-            else:
-                emoji = "⚪"
-
-            kickoff = (
-                match["match_date"]
-                .strftime(
-                    "%b %d • %I:%M %p UTC"
-                )
-            )
-
-            probability = round(
-                float(
-                    match["win_probability"]
-                ),
-                1
-            )
-
-            st.markdown(
-                f"""
-### {emoji} {match['home_team']} vs {match['away_team']}
-
-**Prediction:** {match['pick']}
-
-**Win Probability:** {probability}%
-
-**Confidence:** {match['confidence']}
-
-**Kickoff:** {kickoff}
-
----
-"""
-            )
-
         st.markdown(
             "**Built by Raphael Shehata**"
         )
