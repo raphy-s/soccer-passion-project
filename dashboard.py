@@ -224,11 +224,11 @@ if len(matches_df) > 0:
 """
             )
 
-    else:
+        else:
 
-        st.info(
-            "No upcoming World Cup matches."
-        )
+            st.info(
+                "No upcoming World Cup matches."
+            )
 
         # ==================================================
         # TEAM EXPLORER
