@@ -161,7 +161,7 @@ if competition == "World Cup":
             st.info(
                 "No match predictions available."
             )
-                        )
+                )
 
         # -----------------------
         # TEAM SELECTOR
