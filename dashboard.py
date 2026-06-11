@@ -201,24 +201,24 @@ if competition == "World Cup":
         
         if len(picks_df) > 0:
 
-        from datetime import datetime
+            from datetime import datetime
 
-        today = datetime.utcnow().date()
+            today = datetime.utcnow().date()
 
-        matches_df["match_date"] = pd.to_datetime(
-            matches_df["match_date"]
-        )
+            matches_df["match_date"] = pd.to_datetime(
+                matches_df["match_date"]
+            )
 
-        picks_df = matches_df[
-            matches_df["match_date"].dt.date == today
-        ][
-            [
-                "home_team",
-                "away_team",
-                "pick",
-                "confidence"
+            picks_df = matches_df[
+                matches_df["match_date"].dt.date == today
+            ][
+                [
+                    "home_team",
+                    "away_team",
+                    "pick",
+                    "confidence"
+                ]
             ]
-        ]
 
             st.dataframe(
                 picks_df,
