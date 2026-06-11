@@ -162,49 +162,56 @@ if competition == "World Cup":
         # TODAY'S PICKS
         # ==================================================
 
-        st.subheader(
-            "🎯 Today's Matchday Picks"
-        )
+        # ==================================================
+# NEXT MATCHDAY PICKS
+# ==================================================
 
-        if len(matches_df) > 0:
+st.subheader(
+    "🎯 Upcoming Matchday Picks"
+)
 
-            today_matches = matches_df[
-                matches_df["match_date"].dt.date
-                ==
-                pd.Timestamp.utcnow().date()
-            ]
+if len(matches_df) > 0:
 
-            if len(today_matches) > 0:
+    matches_df["match_date"] = pd.to_datetime(
+        matches_df["match_date"],
+        utc=True
+    )
 
-                for _, match in (
-                    today_matches.iterrows()
-                ):
+    now = pd.Timestamp.utcnow()
 
-                    confidence = (
-                        match["confidence"]
-                    )
+    upcoming_matches = (
+        matches_df[
+            matches_df["match_date"] >= now
+        ]
+        .sort_values("match_date")
+        .head(8)
+    )
 
-                    if confidence == "Very High":
-                        emoji = "🔥"
+    if len(upcoming_matches) > 0:
 
-                    elif confidence == "High":
-                        emoji = "✅"
+        for _, match in upcoming_matches.iterrows():
 
-                    elif confidence == "Medium":
-                        emoji = "📊"
+            confidence = match["confidence"]
 
-                    else:
-                        emoji = "⚪"
+            if confidence == "Very High":
+                emoji = "🔥"
 
-                    kickoff = (
-                        match["match_date"]
-                        .strftime(
-                            "%I:%M %p UTC"
-                        )
-                    )
+            elif confidence == "High":
+                emoji = "✅"
 
-                    st.markdown(
-                        f"""
+            elif confidence == "Medium":
+                emoji = "📊"
+
+            else:
+                emoji = "⚪"
+
+            kickoff = (
+                match["match_date"]
+                .strftime("%b %d • %I:%M %p UTC")
+            )
+
+            st.markdown(
+                f"""
 ### {emoji} {match['home_team']} vs {match['away_team']}
 
 **Prediction:** {match['pick']}
@@ -215,15 +222,13 @@ if competition == "World Cup":
 
 ---
 """
-                    )
+            )
 
-            else:
+    else:
 
-                st.info(
-                    "No World Cup matches today."
-                )
-
-        st.markdown("---")
+        st.info(
+            "No upcoming World Cup matches."
+        )
 
         # ==================================================
         # TEAM EXPLORER
